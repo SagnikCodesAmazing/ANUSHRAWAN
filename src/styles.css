@@ -1,0 +1,305 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Cargo Sentinel design system — dark-first navy/cyan palette.
+ * Navy #1B2A4A, Transport Blue #1E5AA8, Electric Cyan #00E5FF,
+ * Midnight #0D1B2A, Amber #FFB300, Light Grey #F1F3F5.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-navy: var(--navy);
+  --color-midnight: var(--midnight);
+  --color-transport: var(--transport);
+  --color-cyan: var(--cyan);
+  --color-amber: var(--amber);
+  --color-lightgrey: var(--lightgrey);
+  --color-saffron: var(--saffron);
+  --color-india-green: var(--india-green);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", "Inter", sans-serif;
+  --shadow-glow:
+    0 0 0 1px color-mix(in oklab, var(--cyan) 30%, transparent),
+    0 0 28px -6px color-mix(in oklab, var(--cyan) 45%, transparent);
+  --shadow-panel: 0 24px 60px -30px oklch(0 0 0 / 0.75);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* brand tokens */
+  --navy: oklch(0.29 0.062 261);
+  --midnight: oklch(0.2 0.045 254);
+  --transport: oklch(0.48 0.145 258);
+  --cyan: oklch(0.85 0.148 200);
+  --amber: oklch(0.8 0.16 78);
+  --lightgrey: oklch(0.965 0.002 250);
+  --saffron: oklch(0.75 0.16 55);
+  --india-green: oklch(0.55 0.12 155);
+
+  /* dark-first semantic mapping */
+  --background: var(--midnight);
+  --foreground: oklch(0.97 0.005 250);
+  --card: oklch(0.245 0.05 258);
+  --card-foreground: oklch(0.97 0.005 250);
+  --popover: oklch(0.245 0.05 258);
+  --popover-foreground: oklch(0.97 0.005 250);
+  --primary: var(--transport);
+  --primary-foreground: oklch(0.985 0.003 250);
+  --secondary: oklch(0.31 0.05 258);
+  --secondary-foreground: oklch(0.97 0.005 250);
+  --muted: oklch(0.29 0.045 258);
+  --muted-foreground: oklch(0.72 0.025 250);
+  --accent: var(--cyan);
+  --accent-foreground: oklch(0.2 0.045 254);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.985 0.003 250);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: var(--cyan);
+  --chart-1: var(--cyan);
+  --chart-2: var(--amber);
+  --chart-3: var(--transport);
+  --chart-4: var(--saffron);
+  --chart-5: var(--india-green);
+  --sidebar: var(--midnight);
+  --sidebar-foreground: oklch(0.9 0.01 250);
+  --sidebar-primary: var(--transport);
+  --sidebar-primary-foreground: oklch(0.985 0.003 250);
+  --sidebar-accent: oklch(0.29 0.05 258);
+  --sidebar-accent-foreground: var(--cyan);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--cyan);
+}
+
+/* Light surfaces used by landing / auth panels */
+.surface-light {
+  --background: var(--lightgrey);
+  --foreground: oklch(0.24 0.04 258);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.04 258);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.04 258);
+  --muted: oklch(0.94 0.004 250);
+  --muted-foreground: oklch(0.5 0.02 255);
+  --secondary: oklch(0.94 0.004 250);
+  --secondary-foreground: oklch(0.24 0.04 258);
+  --border: oklch(0.24 0.04 258 / 12%);
+  --input: oklch(0.24 0.04 258 / 18%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Dark surfaces with high-contrast text */
+.surface-dark {
+  --background: var(--midnight);
+  --foreground: oklch(0.98 0.005 250);
+  --card: oklch(0.245 0.05 258);
+  --card-foreground: oklch(0.98 0.005 250);
+  --popover: oklch(0.245 0.05 258);
+  --popover-foreground: oklch(0.98 0.005 250);
+  --muted: oklch(0.29 0.045 258);
+  --muted-foreground: oklch(0.82 0.02 250);
+  --border: oklch(1 0 0 / 16%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background-color: #1e5aa8;
+  color: #ffffff;
+}
+
+@utility tricolor-line {
+  background-image: linear-gradient(
+    90deg,
+    var(--saffron) 0%,
+    var(--saffron) 33.3%,
+    oklch(0.99 0 0) 33.3%,
+    oklch(0.99 0 0) 66.6%,
+    var(--india-green) 66.6%,
+    var(--india-green) 100%
+  );
+}
+
+@utility glow-cyan {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility text-glow {
+  text-shadow: 0 0 24px color-mix(in oklab, var(--cyan) 55%, transparent);
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--amber) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 16px color-mix(in oklab, var(--amber) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--amber) 0%, transparent);
+  }
+}
+
+@keyframes pulse-ring-cyan {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--cyan) 60%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 18px color-mix(in oklab, var(--cyan) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--cyan) 0%, transparent);
+  }
+}
+
+@utility pulse-alert {
+  animation: pulse-ring 1.5s infinite;
+}
+
+@utility pulse-live {
+  animation: pulse-ring-cyan 2s infinite;
+}
+
+@utility chakra-motif {
+  background-image: repeating-conic-gradient(
+    from 0deg,
+    color-mix(in oklab, var(--transport) 30%, transparent) 0deg 3deg,
+    transparent 3deg 15deg
+  );
+  border-radius: 9999px;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes float-slow-reverse {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -80;
+  }
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility animate-float {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+@utility animate-float-reverse {
+  animation: float-slow-reverse 4.5s ease-in-out infinite;
+}
+
+@utility animate-spin-slow {
+  animation: spin-slow 35s linear infinite;
+}
+
+@utility animate-dash-flow {
+  animation: dash-flow 3s linear infinite;
+}
+
+@utility animate-ticker {
+  animation: ticker-scroll 28s linear infinite;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  /* Scopes Leaflet elements inside an isolated stacking context */
+  .leaflet-container {
+    z-index: 0 !important;
+    isolation: isolate;
+  }
+}
