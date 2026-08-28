@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Real-time load-sensor cargo theft detection, NavIC tracking, and highway telemetry for Bharat logistics fleets.",
+          "Real-time load-sensor cargo theft detection, TPMS tire pressure monitoring, GSM telemetry, and fuel pipe solenoid valve immobilizer for Bharat logistics fleets.",
       },
       { property: "og:type", content: "website" },
       { property: "og:title", content: "ANUSHRAWAN — Bharat Fleet Security" },

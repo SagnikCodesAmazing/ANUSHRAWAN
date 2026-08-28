@@ -5,8 +5,9 @@ import {
   BellRing,
   CheckCircle2,
   Cpu,
+  Fuel,
+  Gauge,
   MapPinned,
-  Radar,
   Radio,
   Scale,
   ShieldCheck,
@@ -52,49 +53,49 @@ const STATS = [
 ];
 
 const TICKER_ITEMS = [
-  "MH-12-AB-4471 · NH-48 Km 112 · Khalapur Toll Cleared · Bed Load 12,450 kg (124.5 Qtl) · 0.0% variance",
-  "DL-01-CG-9932 · NE-4 Delhi-Jaipur Expressway · Behror Highway Checkpoint · FASTag #44710 Verified",
-  "GJ-05-DR-6624 · Narmada Bridge NH-48 · Kasara Ghat Dynamic Vibration Filter Active · 15,200 kg Nominal",
-  "TN-09-BK-1180 · Krishnagiri Toll NH-44 · NavIC Dual-Frequency L5/S Locked · 0 Theft Alerts",
-  "1,250 Commercial HCVs Protected Across Golden Quadrilateral Corridors · 100% AIS-140 Compliant",
+  "MH-12-AB-4471 · NH-48 Km 112 · Load Cell: 12,450 kg · TPMS: 110 PSI Nominal · Solenoid: Armed · GSM Online",
+  "DL-01-CG-9932 · NE-4 Expressway · TPMS All Axles Balanced (112 PSI) · Load Cell 17,800 kg · Fuel Flow Normal",
+  "GJ-05-DR-6624 · Narmada Bridge NH-48 · Load Cell Dynamic Vibration Filter Active · 15,200 kg · Solenoid Armed",
+  "TN-09-BK-1180 · Krishnagiri NH-44 · 4-Sensor Load Cell Grid Active · TPMS 108 PSI · GSM Uplink Online",
+  "Commercial HCVs Protected with 4-Point Telemetry: Load Cells · TPMS · GSM · Fuel Cut-Off Solenoid",
 ];
 
 const FEATURES = [
   {
-    icon: Radar,
-    title: "NavIC & GPS Live Telemetry",
-    hindi: "नाविक उपग्रह ट्रैकिंग",
-    text: "Dual-satellite positioning, speed, and real-time highway milestone telemetry calibrated for Indian highway corridors.",
+    icon: Scale,
+    title: "Precision Load Cells",
+    hindi: "लोड सेल भार मापन",
+    text: "Multi-point chassis bed strain gauges detect sudden or progressive transit weight loss within 1.2 seconds.",
+  },
+  {
+    icon: Gauge,
+    title: "Axle TPMS Monitoring",
+    hindi: "टायर प्रेशर संवेदक",
+    text: "Continuous per-axle tire pressure (PSI) and thermal tracking ensuring load distribution and anti-tamper security.",
+  },
+  {
+    icon: Radio,
+    title: "GSM Cellular Telemetry",
+    hindi: "जीएसएम संचार नेटवर्क",
+    text: "Industrial GSM telemetry uplink transmitting weight & TPMS telemetry packets and receiving operator remote commands.",
+  },
+  {
+    icon: Fuel,
+    title: "Fuel Solenoid Remote Cut-Off",
+    hindi: "ईंधन सोलेनोइड वाल्व",
+    text: "Inline fuel pipe solenoid valve actuated via GSM to cut off diesel supply and safely stop the truck if a driver is corrupt or refusing to stop.",
   },
   {
     icon: BellRing,
     title: "Instant Theft Alerts",
     hindi: "तात्कालिक चोरी चेतावनी",
-    text: "Sudden load drops raise instant alerts within 1.2 seconds, pinning the nearest toll plaza and Highway Patrol milestone.",
-  },
-  {
-    icon: Scale,
-    title: "Dynamic Vibration Filtering",
-    hindi: "सड़क कंपन निस्पंदन",
-    text: "Intelligent dynamic damping eliminates false triggers caused by potholes, rumble strips, and steep ghat sections.",
-  },
-  {
-    icon: Cpu,
-    title: "FASTag & E-Way Bill Aligned",
-    hindi: "फास्टैग एवं ई-वे बिल",
-    text: "Audit weight in motion directly against consignment manifests from dispatch warehouse to destination hub.",
-  },
-  {
-    icon: MapPinned,
-    title: "National Freight Corridors",
-    hindi: "राष्ट्रीय मालवहन गलियारा",
-    text: "Pre-mapped telemetry across Golden Quadrilateral, Western DFC, and the Delhi-Mumbai Expressway (NE-4).",
+    text: "Real-time load breach alerts dispatched directly to fleet operators with exact kilograms lost and highway location.",
   },
   {
     icon: ShieldCheck,
     title: "Impermeable Security",
-    hindi: "अभेद्य सुरक्षा",
-    text: "End-to-end load sensor telemetry trusted by premier logistics carriers across Northern and Western freight spines.",
+    hindi: "अभेद्य सुरक्षा ढांचा",
+    text: "Zero false alarms on potholes and rough highway ghats with intelligent dynamic vibration filtering.",
   },
 ];
 
@@ -179,7 +180,7 @@ function HeroShowcase() {
               <div>
                 <p className="text-xs font-bold text-white">NH-48 Western Freight Corridor</p>
                 <p className="text-[11px] text-slate-300">
-                  Mumbai → Pune · Truck MH-12-AB-4471 · 12,450 kg Active Load
+                  Load Cell: 12,450 kg · TPMS: 110 PSI · Solenoid: Armed · GSM Online
                 </p>
               </div>
             </div>
@@ -267,9 +268,9 @@ function Landing() {
           </div>
           <div className="flex items-center gap-3 text-[11px]">
             <span className="hidden md:inline-flex items-center gap-1.5 text-cyan-400">
-              <span className="size-1.5 rounded-full bg-cyan-400" /> NavIC Satellite Linked
+              <span className="size-1.5 rounded-full bg-cyan-400" /> GSM Telemetry Connected
             </span>
-            <span className="text-slate-400">FASTag & AIS-140 Compliant</span>
+            <span className="text-slate-400">Load Cell · TPMS · Solenoid Valve Grid</span>
           </div>
         </div>
       </div>
@@ -314,29 +315,29 @@ function Landing() {
             </h1>
 
             <p className="mt-6 max-w-lg text-base text-muted-foreground leading-relaxed">
-              <strong>ANUSHRAWAN (अनुश्रवण)</strong> continuously monitors chassis bed load-cell
-              sensors across India&apos;s national highways. A sudden cargo drop in transit triggers
-              an instant theft alert with precise GPS coordinates, nearest toll plaza, and exact
-              kilograms lost.
+              <strong>ANUSHRAWAN (अनुश्रवण)</strong> combines precision chassis <strong>load cells</strong>,
+              axle <strong>TPMS</strong> sensors, and real-time <strong>GSM</strong> telemetry. If a
+              corrupt driver diverts or refuses to stop during cargo theft, operators remotely
+              actuate an in-line <strong>fuel pipe solenoid valve</strong> to cut fuel and stop the vehicle.
             </p>
 
             {/* Feature Bullets */}
             <div className="mt-6 grid grid-cols-2 gap-2.5 text-xs text-foreground font-medium">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-accent" />
-                <span>Zero false alarms on potholes</span>
+                <span>Load cell precision weight tracking</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-accent" />
-                <span>FASTag weigh-in-motion crosscheck</span>
+                <span>TPMS tire pressure & heat monitoring</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-accent" />
-                <span>Sub-second incident dispatch</span>
+                <span>GSM cellular data uplink</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-accent" />
-                <span>AIS-140 & MoRTH certified</span>
+                <span>Fuel pipe solenoid remote cut-off</span>
               </div>
             </div>
 
@@ -428,22 +429,22 @@ function Landing() {
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
             {[
               {
-                icon: Truck,
+                icon: Scale,
                 step: "Step 01 · चरण ०१",
-                title: "Chassis Bed Strain Gauges",
-                text: "Multi-point load cells integrated on Tata, Ashok Leyland & BharatBenz frames continuously measure bed weight.",
+                title: "Load Cells & Axle TPMS",
+                text: "Chassis load cells continuously measure bed weight while TPMS sensors monitor axle tire pressure and balance.",
               },
               {
-                icon: Radar,
+                icon: Radio,
                 step: "Step 02 · चरण ०२",
-                title: "NavIC Satellite Stream",
-                text: "Readings and highway GPS stream continuously every 1.2s to the Anushrawan secure Indian cloud servers.",
+                title: "GSM Telemetry Uplink",
+                text: "Industrial GSM module continuously streams sensor packets to fleet servers and listens for operator commands.",
               },
               {
-                icon: ShieldCheck,
+                icon: Fuel,
                 step: "Step 03 · चरण ०३",
-                title: "Immediate Theft Alarm",
-                text: "Any transit cargo drop instantly sounds alarms, dispatches alerts, and pins the nearest highway milestone.",
+                title: "Solenoid Fuel Cut-Off & Alarm",
+                text: "If theft occurs or a corrupt driver refuses to stop, fleet operators remotely close the fuel solenoid valve to safely immobilize the truck.",
               },
             ].map((s) => (
               <div

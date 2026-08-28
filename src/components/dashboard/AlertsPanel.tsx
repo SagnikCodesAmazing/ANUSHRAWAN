@@ -69,12 +69,13 @@ export function AlertsPanel({ alerts, onAcknowledge, onDismiss }: AlertsPanelPro
                 <div className="flex items-center gap-2">
                   <span
                     className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold ${
-                      alert.dropPercent > 10
+                      alert.dropPercent === 0 || alert.dropPercent > 10
                         ? "bg-destructive/20 text-destructive-foreground border border-destructive/30"
                         : "bg-amber/20 text-amber"
                     }`}
                   >
-                    <AlertTriangle className="size-3" />-{alert.dropPercent}% Cargo
+                    <AlertTriangle className="size-3" />
+                    {alert.dropPercent === 0 ? "Fuel Cut (Solenoid)" : `-${alert.dropPercent}% Cargo`}
                   </span>
                   <span className="text-xs font-semibold text-foreground">{alert.truckId}</span>
                 </div>

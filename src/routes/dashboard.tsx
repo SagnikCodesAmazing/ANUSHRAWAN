@@ -18,7 +18,9 @@ import { Logo } from "@/components/brand/Logo";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { HistoricalTrends } from "@/components/dashboard/HistoricalTrends";
 import { RouteMapPanel } from "@/components/dashboard/RouteMapPanel";
+import { SolenoidControlPanel } from "@/components/dashboard/SolenoidControlPanel";
 import { StatsRow } from "@/components/dashboard/StatsRow";
+import { TpmsMonitorCard } from "@/components/dashboard/TpmsMonitorCard";
 import { WeightMonitorCard } from "@/components/dashboard/WeightMonitorCard";
 import { useSensorFeed } from "@/hooks/use-sensor-feed";
 import { getTruck, TRUCKS } from "@/lib/fleet-data";
@@ -106,9 +108,9 @@ function Dashboard() {
           </Link>
           <div className="mt-3 flex items-center gap-2 rounded-xl border border-sidebar-border bg-midnight/90 px-3 py-1.5 text-[11px] text-muted-foreground shadow-sm">
             <span className="size-1.5 rounded-full bg-accent animate-pulse" />
-            <span className="font-semibold text-accent">NavIC L5/S</span>
+            <span className="font-semibold text-accent">GSM Telemetry</span>
             <span className="text-border">·</span>
-            <span>Sat-Feed Active</span>
+            <span>Online</span>
           </div>
         </div>
 
@@ -132,10 +134,10 @@ function Dashboard() {
         <div className="mt-auto space-y-2">
           <div className="rounded-xl border border-sidebar-border bg-midnight/60 p-3 text-xs text-muted-foreground">
             <p className="flex items-center gap-2 text-saffron font-semibold">
-              <ShieldCheck className="size-3.5" /> AIS-140 Certified
+              <ShieldCheck className="size-3.5" /> 4-Point Telemetry Grid
             </p>
             <p className="mt-1 text-[11px] leading-relaxed">
-              MoRTH certified load sensor telemetry for Bharat commercial carriers.
+              Load Cell · TPMS · GSM Uplink · Solenoid Valve Remote Fuel Cut-Off.
             </p>
           </div>
           <div className="tricolor-line h-0.5 w-full rounded-full opacity-60" />
@@ -193,10 +195,27 @@ function Dashboard() {
             </span>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Solenoid Valve Fuel Status Badge */}
+            <span
+              className={`hidden sm:inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+                feed.isFuelCut
+                  ? "bg-destructive/20 border-destructive/40 text-destructive-foreground animate-pulse"
+                  : "bg-midnight border-border text-muted-foreground"
+              }`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${
+                  feed.isFuelCut ? "bg-destructive animate-ping" : "bg-emerald-400"
+                }`}
+              />
+              Fuel Solenoid: {feed.isFuelCut ? "CUT OFF" : "OPEN"}
+            </span>
+
+            {/* GSM Uplink Badge */}
             <span className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-border bg-midnight px-3 py-1 text-xs text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-emerald-400" />
-              FASTag: {truck.fastagId}
+              <Radio className="size-3 text-accent animate-pulse" />
+              GSM Telemetry: Active
             </span>
 
             <DropdownMenu>
@@ -217,8 +236,25 @@ function Dashboard() {
           </div>
         </header>
 
-        <main className="space-y-5 p-4 lg:p-6">
-          {section !== "settings" ? (
+        <main className="space-y-5 p-4 lg:p-6 flex-1 flex flex-col">
+          {/* Live Tracking View — Map takes the entire space on the right */}
+          {section === "tracking" && (
+            <div className="w-full flex-1">
+              <RouteMapPanel
+                truck={truck}
+                progress={feed.progress}
+                speed={feed.speed}
+                weight={feed.currentWeight}
+                lastUpdate={feed.lastUpdate}
+                alerting={feed.isBreached}
+                isFuelCut={feed.isFuelCut}
+                fullView={true}
+              />
+            </div>
+          )}
+
+          {/* Overview Dashboard View */}
+          {section === "dashboard" && (
             <>
               <StatsRow
                 activeTrucks={activeTrucks}
@@ -228,64 +264,100 @@ function Dashboard() {
               />
 
               <div className="grid gap-5 xl:grid-cols-3">
-                {showMap && (
-                  <div className="xl:col-span-2">
-                    <RouteMapPanel
-                      truck={truck}
-                      progress={feed.progress}
-                      speed={feed.speed}
-                      weight={feed.currentWeight}
-                      lastUpdate={feed.lastUpdate}
-                      alerting={feed.isBreached}
-                    />
-                  </div>
-                )}
-                {showAlerts && (
-                  <div className={showMap ? "" : "xl:col-span-3"}>
-                    <AlertsPanel
-                      alerts={feed.alerts}
-                      onAcknowledge={feed.acknowledge}
-                      onDismiss={feed.dismiss}
-                    />
-                  </div>
-                )}
+                <div className="xl:col-span-2">
+                  <RouteMapPanel
+                    truck={truck}
+                    progress={feed.progress}
+                    speed={feed.speed}
+                    weight={feed.currentWeight}
+                    lastUpdate={feed.lastUpdate}
+                    alerting={feed.isBreached}
+                    isFuelCut={feed.isFuelCut}
+                    fullView={false}
+                  />
+                </div>
+                <div>
+                  <AlertsPanel
+                    alerts={feed.alerts}
+                    onAcknowledge={feed.acknowledge}
+                    onDismiss={feed.dismiss}
+                  />
+                </div>
               </div>
 
-              {showWeight && (
-                <WeightMonitorCard
-                  truck={truck}
-                  series={feed.series}
-                  currentWeight={feed.currentWeight}
-                  breached={feed.isBreached}
-                  onReset={feed.resetCargo}
-                />
-              )}
+              {/* Solenoid Valve Fuel Pipe Control Panel */}
+              <SolenoidControlPanel
+                truck={truck}
+                solenoidStatus={feed.solenoidStatus}
+                isFuelCut={feed.isFuelCut}
+                gsmSignal={feed.gsmSignal}
+                speed={feed.speed}
+                onTriggerCutoff={feed.triggerSolenoidCutoff}
+                onRestoreFlow={feed.restoreFuelFlow}
+              />
 
-              {showHistory && (
-                <>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <h2 className="font-display text-lg font-bold">Historical Trends</h2>
-                      <p className="text-xs text-muted-foreground">
-                        Hourly load sensor telemetry and highway incident breakdown
-                      </p>
-                    </div>
-                    <Select value={range} onValueChange={setRange}>
-                      <SelectTrigger className="w-[160px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="last-24h">Last 24 hours</SelectItem>
-                        <SelectItem value="last-7d">Last 7 days</SelectItem>
-                        <SelectItem value="last-30d">Last 30 days</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <HistoricalTrends truck={truck} range={range} />
-                </>
-              )}
+              {/* TPMS Tire Pressure Monitoring System */}
+              <TpmsMonitorCard truck={truck} tpms={feed.tpms} />
+
+              <WeightMonitorCard
+                truck={truck}
+                series={feed.series}
+                currentWeight={feed.currentWeight}
+                breached={feed.isBreached}
+                onReset={feed.resetCargo}
+                theftCountdown={feed.theftCountdown}
+                onTriggerTheft={feed.triggerTheftNow}
+              />
             </>
-          ) : (
+          )}
+
+          {/* Alerts Dedicated View */}
+          {section === "alerts" && (
+            <div className="space-y-5">
+              <AlertsPanel
+                alerts={feed.alerts}
+                onAcknowledge={feed.acknowledge}
+                onDismiss={feed.dismiss}
+              />
+              <SolenoidControlPanel
+                truck={truck}
+                solenoidStatus={feed.solenoidStatus}
+                isFuelCut={feed.isFuelCut}
+                gsmSignal={feed.gsmSignal}
+                speed={feed.speed}
+                onTriggerCutoff={feed.triggerSolenoidCutoff}
+                onRestoreFlow={feed.restoreFuelFlow}
+              />
+            </div>
+          )}
+
+          {/* Historical Trends View */}
+          {section === "history" && (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-lg font-bold">Historical Trends</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Hourly load sensor telemetry and highway incident breakdown
+                  </p>
+                </div>
+                <Select value={range} onValueChange={setRange}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="last-24h">Last 24 hours</SelectItem>
+                    <SelectItem value="last-7d">Last 7 days</SelectItem>
+                    <SelectItem value="last-30d">Last 30 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <HistoricalTrends truck={truck} range={range} />
+            </>
+          )}
+
+          {/* Vehicle Settings View */}
+          {section === "settings" && (
             <div className="max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-panel">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <div>
@@ -305,7 +377,10 @@ function Dashboard() {
                 {[
                   ["Vehicle Registration", `${truck.plate} (RTO Registered)`],
                   ["Truck Make & Model", truck.model],
-                  ["FASTag ID", truck.fastagId],
+                  ["GSM Telemetry IMEI", truck.gsmImei],
+                  ["Fuel Solenoid Valve", "12V/24V Inline Diesel Cut-Off Valve (Pre-Injection Line)"],
+                  ["TPMS Sensor Unit", "Direct Internal Valve Sensors (433MHz to GSM Gateway)"],
+                  ["Load Cell System", "4-Point Chassis Shear Beam Load Cells (Zero False Alarm Filter)"],
                   ["Highway Corridor", `${truck.route} · ${truck.corridor}`],
                   ["Consignment Cargo", truck.cargoType],
                   [

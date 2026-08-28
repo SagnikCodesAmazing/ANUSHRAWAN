@@ -8,6 +8,7 @@ import {
   MapPin,
   Maximize2,
   Navigation,
+  PowerOff,
   Radio,
   RotateCcw,
   ShieldCheck,
@@ -24,6 +25,8 @@ interface RouteMapPanelProps {
   weight: number;
   lastUpdate: string;
   alerting: boolean;
+  isFuelCut?: boolean;
+  fullView?: boolean;
 }
 
 type MapTheme = "streets" | "dark" | "satellite";
@@ -40,13 +43,13 @@ const TILES = {
   dark: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin',
-    name: "Dark NavIC",
+    name: "Dark Route",
   },
-  // Esri World Imagery (Satellite) — NO watermark, NO API key required
+  // Esri World Imagery (Aerial) — NO watermark, NO API key required
   satellite: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, Earthstar Geographics',
-    name: "Satellite",
+    name: "Aerial Imagery",
   },
 };
 
@@ -90,6 +93,8 @@ export function RouteMapPanel({
   weight,
   lastUpdate,
   alerting,
+  isFuelCut = false,
+  fullView = false,
 }: RouteMapPanelProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [mapTheme, setMapTheme] = useState<MapTheme>("streets");
@@ -212,7 +217,7 @@ export function RouteMapPanel({
         <div style="font-family:inherit; padding:4px;">
           <strong style="color:#16A34A; font-size:13px;">[Origin] ${startPoint.label}</strong>
           <p style="font-size:11px; color:#475569; margin:4px 0 0 0;">${startPoint.details ?? "Route Origin"}</p>
-          <div style="margin-top:6px; font-size:10px; color:#0F172A; font-weight:600;">FASTag Lane Verified · Loaded Weight: ${truck.baseWeightKg.toLocaleString("en-IN")} kg</div>
+          <div style="margin-top:6px; font-size:10px; color:#0F172A; font-weight:600;">GSM Telemetry Verified · Loaded Weight: ${truck.baseWeightKg.toLocaleString("en-IN")} kg</div>
         </div>
       `);
 
@@ -354,6 +359,19 @@ export function RouteMapPanel({
     }
   };
 
+  // Re-fit and invalidate map sizing when toggling to/from fullView
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+        if (routePolylineRef.current) {
+          mapInstanceRef.current.fitBounds(routePolylineRef.current.getBounds(), { padding: [40, 40] });
+        }
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [fullView]);
+
   return (
     <div className="relative isolate z-0 flex flex-col rounded-2xl border border-border bg-card p-5 shadow-panel">
       {/* Top telemetry header */}
@@ -364,13 +382,13 @@ export function RouteMapPanel({
             <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs font-mono text-muted-foreground">
               {truck.plate}
             </span>
-            <span className="rounded-md border border-saffron/40 bg-saffron/10 px-2 py-0.5 text-[11px] font-semibold text-saffron">
-              {truck.fastagId}
+            <span className="rounded-md border border-accent/40 bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+              GSM Telemetry
             </span>
           </div>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1 text-accent font-medium">
-              <Radio className="size-3 animate-pulse" /> NavIC Satellite Link
+              <Radio className="size-3 animate-pulse" /> GSM Telemetry Uplink
             </span>
             <span>·</span>
             <span>{truck.corridor}</span>
@@ -411,8 +429,12 @@ export function RouteMapPanel({
       </div>
 
       {/* Map Viewport — Scoped with isolate and z-0 so it never renders over sticky headers */}
-      <div className="relative isolate z-0 mt-4 h-[380px] w-full overflow-hidden rounded-xl border border-border shadow-inner">
-        {/* Layer style switcher overlay (Google style vs Dark NavIC vs Satellite) */}
+      <div
+        className={`relative isolate z-0 mt-4 w-full overflow-hidden rounded-xl border border-border shadow-inner transition-all duration-300 ${
+          fullView ? "h-[calc(100vh-210px)] min-h-[620px]" : "h-[380px]"
+        }`}
+      >
+        {/* Layer style switcher overlay (Street View vs Dark Route vs Satellite) */}
         <div className="absolute top-3 left-3 z-20 flex items-center rounded-xl border border-slate-700/80 bg-slate-950/90 p-1 shadow-lg backdrop-blur">
           <button
             type="button"
@@ -436,7 +458,7 @@ export function RouteMapPanel({
             }`}
           >
             <Radio className="size-3" />
-            Dark NavIC
+            Dark Route
           </button>
           <button
             type="button"
@@ -448,9 +470,17 @@ export function RouteMapPanel({
             }`}
           >
             <Layers className="size-3" />
-            Satellite
+            Aerial
           </button>
         </div>
+
+        {/* Immobilization Warning Ribbon */}
+        {isFuelCut && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-xl border border-destructive bg-destructive/90 px-4 py-2 text-xs font-bold text-white shadow-xl backdrop-blur animate-pulse">
+            <PowerOff className="size-4" />
+            <span>VEHICLE IMMOBILIZED · FUEL PIPE SOLENOID VALVE CLOSED</span>
+          </div>
+        )}
 
         {/* Highway Corridor Tag Overlay */}
         <div className="absolute bottom-3 left-3 z-20 hidden sm:flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-950/90 px-3 py-1.5 text-xs text-slate-200 shadow-lg backdrop-blur">
@@ -468,7 +498,7 @@ export function RouteMapPanel({
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-midnight text-muted-foreground">
             <Radio className="size-8 text-accent animate-pulse mb-2" />
             <p className="text-sm font-medium text-foreground">
-              Loading Google Maps View & NavIC Telemetry...
+              Loading Highway Corridor & GSM Telemetry...
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               Plotting Indian highway corridor waypoints

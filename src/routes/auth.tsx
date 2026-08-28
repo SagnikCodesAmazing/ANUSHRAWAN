@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { Building2, Lock, Mail, Navigation, ShieldCheck, Truck, User } from "lucide-react";
+import { Building2, Fuel, Gauge, Lock, Mail, Radio, Scale, ShieldCheck, Truck, User } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,21 +96,28 @@ function AuthPage() {
           </h2>
 
           <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-            Real-time IoT load-sensor surveillance, NavIC highway tracking, and sub-second cargo
-            drop alerts engineered specifically for Indian fleet operators.
+            Real-time chassis load cells, TPMS tire pressure telemetry, GSM communications, and
+            remote fuel pipe solenoid valve immobilization engineered for Indian fleet operators.
           </p>
 
           <ul className="mt-8 space-y-3.5 text-sm">
             {[
               {
-                icon: Truck,
-                text: "Per-truck baselines for Tata, Ashok Leyland & BharatBenz HCVs",
+                icon: Scale,
+                text: "Multi-point chassis load cells for real-time weight measuring",
               },
               {
-                icon: ShieldCheck,
-                text: "Instant 1.2s theft trigger with nearest Toll Plaza dispatch",
+                icon: Gauge,
+                text: "Axle TPMS sensors for continuous tire pressure & temperature monitoring",
               },
-              { icon: Navigation, text: "FASTag & VAHAN compliant highway transit monitoring" },
+              {
+                icon: Radio,
+                text: "Industrial GSM module for real-time cellular data uplink and commands",
+              },
+              {
+                icon: Fuel,
+                text: "Remote fuel line solenoid valve cut-off to immobilize corrupt drivers",
+              },
             ].map((i) => (
               <li key={i.text} className="flex items-center gap-3">
                 <span className="rounded-lg bg-accent/15 p-1 text-accent">
@@ -125,7 +132,7 @@ function AuthPage() {
         <div className="relative">
           <div className="tricolor-line h-1 w-36 rounded-full" />
           <p className="mt-2 text-[11px] text-muted-foreground">
-            National Fleet Protection Grid · NavIC Telemetry
+            National Fleet Protection Grid · 4-Point Hardware Telemetry
           </p>
         </div>
       </section>

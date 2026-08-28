@@ -1,5 +1,14 @@
 export type TruckStatus = "active" | "idle" | "alert";
 
+export type TpmsData = {
+  frontLeftPsi: number;
+  frontRightPsi: number;
+  rearLeftPsi: number;
+  rearRightPsi: number;
+  tempC: number;
+  status: "optimal" | "warning";
+};
+
 export type Truck = {
   id: string;
   plate: string;
@@ -9,7 +18,10 @@ export type Truck = {
   model: string;
   cargoType: string;
   cargoValueInr: number;
-  fastagId: string;
+  gsmImei: string;
+  gsmCarrier: string;
+  solenoidValveStatus: "OPEN" | "CLOSED";
+  tpms: TpmsData;
   capacityKg: number;
   baseWeightKg: number;
   thresholdKg: number;
@@ -26,7 +38,17 @@ export const TRUCKS: Truck[] = [
     model: "Tata Prima 5530.S Heavy Hauler",
     cargoType: "Automotive Precision Parts & Alloys",
     cargoValueInr: 5400000,
-    fastagId: "FASTAG-MH12-88219",
+    gsmImei: "GSM-864192040182",
+    gsmCarrier: "GSM Telemetry",
+    solenoidValveStatus: "OPEN",
+    tpms: {
+      frontLeftPsi: 110,
+      frontRightPsi: 111,
+      rearLeftPsi: 112,
+      rearRightPsi: 112,
+      tempC: 44,
+      status: "optimal",
+    },
     capacityKg: 16000,
     baseWeightKg: 12450,
     thresholdKg: 11800,
@@ -41,7 +63,17 @@ export const TRUCKS: Truck[] = [
     model: "BharatBenz 2823R Multi-Axle",
     cargoType: "Consumer Electronics & Hardware",
     cargoValueInr: 8800000,
-    fastagId: "FASTAG-DL01-44710",
+    gsmImei: "GSM-869201481190",
+    gsmCarrier: "GSM Telemetry",
+    solenoidValveStatus: "OPEN",
+    tpms: {
+      frontLeftPsi: 112,
+      frontRightPsi: 112,
+      rearLeftPsi: 114,
+      rearRightPsi: 113,
+      tempC: 42,
+      status: "optimal",
+    },
     capacityKg: 20000,
     baseWeightKg: 17800,
     thresholdKg: 16900,
@@ -56,7 +88,17 @@ export const TRUCKS: Truck[] = [
     model: "Ashok Leyland AVTR 4220 8x2",
     cargoType: "Export Textiles & Pharmaceutical Goods",
     cargoValueInr: 4200000,
-    fastagId: "FASTAG-TN09-32118",
+    gsmImei: "GSM-863004128934",
+    gsmCarrier: "GSM Telemetry",
+    solenoidValveStatus: "OPEN",
+    tpms: {
+      frontLeftPsi: 108,
+      frontRightPsi: 109,
+      rearLeftPsi: 110,
+      rearRightPsi: 110,
+      tempC: 41,
+      status: "optimal",
+    },
     capacityKg: 14000,
     baseWeightKg: 9800,
     thresholdKg: 9200,
@@ -71,7 +113,17 @@ export const TRUCKS: Truck[] = [
     model: "Eicher Pro 6028 Commercial Carrier",
     cargoType: "Chemical Ingot & Synthetic Yarn",
     cargoValueInr: 6100000,
-    fastagId: "FASTAG-GJ05-99823",
+    gsmImei: "GSM-867710294561",
+    gsmCarrier: "GSM Telemetry",
+    solenoidValveStatus: "OPEN",
+    tpms: {
+      frontLeftPsi: 111,
+      frontRightPsi: 110,
+      rearLeftPsi: 113,
+      rearRightPsi: 114,
+      tempC: 45,
+      status: "optimal",
+    },
     capacityKg: 18000,
     baseWeightKg: 15200,
     thresholdKg: 14400,
@@ -130,7 +182,7 @@ export const GEO_ROUTES: Record<string, GeoPoint[]> = {
       details: "Terminal 4 · Dispatched 05:30 IST",
       isStart: true,
     },
-    { lat: 18.9894, lng: 73.1175, label: "Panvel Toll Plaza", details: "FASTag Lane 04 · Cleared" },
+    { lat: 18.9894, lng: 73.1175, label: "Panvel Toll Plaza", details: "Highway Checkpoint 04 · GSM Verified" },
     { lat: 18.7885, lng: 73.3082, label: "Khalapur Toll Plaza", details: "Km 32 · Speed 68 km/h" },
     {
       lat: 18.7546,
@@ -165,7 +217,7 @@ export const GEO_ROUTES: Record<string, GeoPoint[]> = {
       lat: 28.4068,
       lng: 76.9934,
       label: "Gurugram Kherki Daula Toll",
-      details: "FASTag Express Lane",
+      details: "Highway Express Corridor",
     },
     {
       lat: 28.2055,
@@ -199,7 +251,7 @@ export const GEO_ROUTES: Record<string, GeoPoint[]> = {
     },
     { lat: 12.9692, lng: 79.9442, label: "Sriperumbudur Auto Hub", details: "NH-48 Auto Cluster" },
     { lat: 12.8342, lng: 79.7036, label: "Kanchipuram Bypass", details: "Km 68 · Speed 58 km/h" },
-    { lat: 12.9165, lng: 79.1325, label: "Vellore Pallikonda Toll", details: "FASTag Verified" },
+    { lat: 12.9165, lng: 79.1325, label: "Vellore Pallikonda Toll", details: "GSM Node Verified" },
     {
       lat: 12.6845,
       lng: 78.6186,
@@ -229,7 +281,7 @@ export const GEO_ROUTES: Record<string, GeoPoint[]> = {
       details: "Textile Complex · Dispatched 07:00 IST",
       isStart: true,
     },
-    { lat: 21.4012, lng: 72.9325, label: "Kim Toll Plaza", details: "FASTag Lane 02" },
+    { lat: 21.4012, lng: 72.9325, label: "Kim Toll Plaza", details: "Industrial Gate 02" },
     {
       lat: 21.6264,
       lng: 73.0152,
@@ -313,10 +365,7 @@ export function seedWeightSeries(truck: Truck, points = 24, baseTimestamp?: numb
   const rand = seeded(truck.baseWeightKg);
   // Default to a deterministic base time for SSR if not supplied
   const now = baseTimestamp ?? (typeof window !== "undefined" ? Date.now() : 1772186400000);
-  const stepMs = 30 * 1000; // 30 seconds per step => 24 points = 12 minutes total duration
-
-  // Simulate realistic 10+ minute progressive loss profile for alert-state trucks
-  const isTheftTruck = truck.id === "MH-TRK-104";
+  const stepMs = 30 * 1000; // 30 seconds per step
 
   return Array.from({ length: points }, (_, i) => {
     const pointTs = now - (points - 1 - i) * stepMs;
@@ -328,23 +377,13 @@ export function seedWeightSeries(truck: Truck, points = 24, baseTimestamp?: numb
       second: "2-digit",
     });
 
-    let weight = truck.baseWeightKg + (rand() - 0.5) * 30;
-
-    // Weight loss happens progressively over at least 10 minutes!
-    // Points 0..3 (first 2 minutes) are nominal.
-    // Points 4..23 (20 steps * 30s = 10 full minutes) show progressive, steady loss!
-    if (isTheftTruck && i >= 4) {
-      const step = i - 4; // 0 to 19 (20 steps over 10 minutes)
-      const fraction = (step + 1) / 20; // 0.05 to 1.0
-      const totalLoss = truck.baseWeightKg - truck.thresholdKg + 550; // drops well below threshold
-      const progressiveLoss = totalLoss * Math.pow(fraction, 0.95);
-      weight = Math.round(truck.baseWeightKg - progressiveLoss + (rand() - 0.5) * 35);
-    }
+    // Start with nominal highway transit weight with minor road vibration
+    const weight = Math.round(truck.baseWeightKg + (rand() - 0.5) * 20);
 
     return {
       t: i,
       time: timeStr,
-      weight: Math.max(0, Math.round(weight)),
+      weight: Math.max(0, weight),
     };
   });
 }

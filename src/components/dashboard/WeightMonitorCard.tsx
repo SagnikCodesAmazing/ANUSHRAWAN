@@ -18,6 +18,8 @@ interface WeightMonitorCardProps {
   currentWeight: number;
   breached: boolean;
   onReset: () => void;
+  theftCountdown?: number;
+  onTriggerTheft?: () => void;
 }
 
 export function WeightMonitorCard({
@@ -26,13 +28,20 @@ export function WeightMonitorCard({
   currentWeight,
   breached,
   onReset,
+  theftCountdown,
+  onTriggerTheft,
 }: WeightMonitorCardProps) {
-  const minWeight = Math.min(truck.thresholdKg - 800, ...series.map((s) => s.weight));
-  const maxWeight =
-    Math.max(
-      truck.capacityKg,
-      ...(series.length ? series.map((s) => s.weight) : [truck.baseWeightKg]),
-    ) + 200;
+  // Focus the chart domain tightly around active cargo weight range, threshold, and baseline
+  // so the data curve and gradient area richly fill the vertical height of the chart
+  const allWeights = series.length ? series.map((s) => s.weight) : [currentWeight];
+  const lowestObserved = Math.min(...allWeights, currentWeight);
+  const highestObserved = Math.max(...allWeights, currentWeight);
+
+  const minBound = Math.min(lowestObserved, truck.thresholdKg) - 350;
+  const maxBound = Math.max(highestObserved, truck.baseWeightKg) + 350;
+
+  const yDomainMin = Math.floor(minBound / 250) * 250;
+  const yDomainMax = Math.ceil(maxBound / 250) * 250;
 
   const dropKg = truck.baseWeightKg - currentWeight;
   const dropPercent = Math.max(0, (dropKg / truck.baseWeightKg) * 100);
@@ -45,7 +54,7 @@ export function WeightMonitorCard({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-display text-base font-bold text-foreground">
-              Live Bed Load Sensor
+              Load Cell · Cargo Weight Monitor
             </h3>
             <span className="rounded bg-saffron/10 border border-saffron/20 px-1.5 py-0.5 text-[10px] font-semibold text-saffron">
               भार संवेदक
@@ -107,6 +116,19 @@ export function WeightMonitorCard({
             </span>
           </div>
 
+          {theftCountdown !== undefined && theftCountdown > 0 && !breached && onTriggerTheft && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onTriggerTheft}
+              className="h-10 border-amber/40 bg-amber/10 text-amber hover:bg-amber/20 hover:text-amber text-xs font-semibold gap-1.5"
+              title="Skip 1-minute countdown and start simulated theft immediately"
+            >
+              <AlertOctagon className="size-3.5" />
+              Simulate Theft Now ({theftCountdown}s)
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
@@ -123,12 +145,21 @@ export function WeightMonitorCard({
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground bg-midnight/50 px-3 py-1.5 rounded-lg border border-border/50">
         <span className="flex items-center gap-1.5 text-accent font-medium">
           <span className="size-2 rounded-full bg-accent animate-pulse" />
-          Dynamic Pothole & Ghat Vibration Filter Active
+          Load Cell Dynamic Vibration Filter Active
         </span>
         <span className="text-muted-foreground">
-          FASTag: <strong className="text-foreground">{truck.fastagId}</strong> · Telemetry Window:{" "}
-          <strong className="text-foreground font-mono">12 Minutes</strong> (Loss Duration:{" "}
-          <strong className="text-amber font-mono">10+ mins</strong>)
+          {theftCountdown !== undefined && theftCountdown > 0 && !breached ? (
+            <span>
+              Transit State: <strong className="text-emerald-400">Normal Secure Cargo</strong> · Simulated Highway Theft starts in{" "}
+              <strong className="text-amber font-mono font-bold">{theftCountdown}s</strong>
+            </span>
+          ) : (
+            <span>
+              Load Cells: <strong className="text-foreground">4-Point Chassis Sensors</strong> · Telemetry Window:{" "}
+              <strong className="text-foreground font-mono">12 Minutes</strong> (Loss Duration:{" "}
+              <strong className="text-amber font-mono">10+ mins</strong>)
+            </span>
+          )}
         </span>
       </div>
 
@@ -149,18 +180,20 @@ export function WeightMonitorCard({
         </div>
       )}
 
-      {/* Recharts Area Chart */}
-      <div className="mt-5 h-[280px] w-full">
+      {/* Recharts Area Chart — Richly filled gradient and focused load range */}
+      <div className="mt-5 h-[340px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={series} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+          <AreaChart data={series} margin={{ top: 20, right: 25, left: 10, bottom: 5 }}>
             <defs>
               <linearGradient id="weightNormalGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#00E5FF" stopOpacity={0.0} />
+                <stop offset="0%" stopColor="#00E5FF" stopOpacity={0.65} />
+                <stop offset="50%" stopColor="#00E5FF" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#00E5FF" stopOpacity={0.04} />
               </linearGradient>
               <linearGradient id="weightBreachGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#FFB300" stopOpacity={0.45} />
-                <stop offset="95%" stopColor="#FFB300" stopOpacity={0.0} />
+                <stop offset="0%" stopColor="#FFB300" stopOpacity={0.7} />
+                <stop offset="50%" stopColor="#FFB300" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#FFB300" stopOpacity={0.05} />
               </linearGradient>
             </defs>
 
@@ -177,7 +210,8 @@ export function WeightMonitorCard({
             />
 
             <YAxis
-              domain={[Math.floor(minWeight / 500) * 500, Math.ceil(maxWeight / 500) * 500]}
+              domain={[yDomainMin, yDomainMax]}
+              tickCount={6}
               stroke="#727a8c"
               fontSize={11}
               tickLine={false}
@@ -211,21 +245,21 @@ export function WeightMonitorCard({
                 value: `Alert Threshold (${truck.thresholdKg.toLocaleString("en-IN")} kg)`,
                 fill: "#FFB300",
                 fontSize: 11,
-                position: "insideTopRight",
+                position: "insideBottomRight",
               }}
             />
 
             {/* Baseline line */}
             <ReferenceLine
               y={truck.baseWeightKg}
-              stroke="#1E5AA8"
-              strokeDasharray="2 2"
-              strokeWidth={1}
+              stroke="#38bdf8"
+              strokeDasharray="3 3"
+              strokeWidth={1.5}
               label={{
                 value: `Baseline (${truck.baseWeightKg.toLocaleString("en-IN")} kg)`,
-                fill: "#727a8c",
-                fontSize: 10,
-                position: "insideBottomRight",
+                fill: "#38bdf8",
+                fontSize: 11,
+                position: "insideTopRight",
               }}
             />
 
@@ -233,7 +267,7 @@ export function WeightMonitorCard({
               type="monotone"
               dataKey="weight"
               stroke={breached ? "#FFB300" : "#00E5FF"}
-              strokeWidth={2.5}
+              strokeWidth={3}
               fill={breached ? "url(#weightBreachGrad)" : "url(#weightNormalGrad)"}
               isAnimationActive={false}
             />
